@@ -53,8 +53,8 @@ create policy "readings_delete_own" on public.glucose_readings for delete to aut
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = '' as $$
 begin
-  insert into public.profiles (id, email) values (new.id, new.email)
-  on conflict (id) do update set email = excluded.email;
+  insert into public.profiles (id, email, diabetes_type) values (new.id, new.email, nullif(new.raw_user_meta_data->>'diabetes_type',''))
+  on conflict (id) do update set email = excluded.email, diabetes_type = excluded.diabetes_type;
   insert into public.user_settings (user_id) values (new.id)
   on conflict (user_id) do nothing;
   return new;
